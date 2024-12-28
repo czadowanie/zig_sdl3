@@ -98,7 +98,7 @@ pub fn build(b: *std.Build) !void {
         sdl_lib.defineCMacro("_WINDOWS", null);
         sdl_lib.defineCMacro("_WIN32", null);
 
-        const win_sdk = try std.zig.WindowsSdk.find(b.allocator);
+        const win_sdk = try std.zig.WindowsSdk.find(b.allocator, target.result.cpu.arch);
         defer std.zig.WindowsSdk.free(win_sdk, b.allocator);
         if (win_sdk.windows10sdk == null) {
             std.debug.print("Windows 10 SDK could not be found.", .{});
@@ -150,16 +150,16 @@ pub fn build(b: *std.Build) !void {
     sdl_lib.installHeader(sdl.path("CREDITS.md"), "../lib/SDL_CREDITS.md");
     sdl_lib.installHeader(sdl.path("src/video/yuv2rgb/LICENSE"), "../lib/yuv2rgb_LICENSE");
     sdl_lib.installHeader(sdl.path("src/hidapi/LICENSE-bsd.txt"), "../lib/hidapi_LICENSE.txt");
-    
-    sdl_lib.installHeadersDirectory(sdl.path("include"), "", .{ .include_extensions = &.{ ".h" } });
-    sdl_lib.installHeadersDirectory(sdl.path("include/build_config"), "", .{ .include_extensions = &.{ ".h" } });
+
+    sdl_lib.installHeadersDirectory(sdl.path("include"), "", .{ .include_extensions = &.{".h"} });
+    sdl_lib.installHeadersDirectory(sdl.path("include/build_config"), "", .{ .include_extensions = &.{".h"} });
 
     const translate_sdl_header = b.addTranslateC(.{
         .root_source_file = lazy_from_path("translate_include.h", b),
         .target = target,
         .optimize = optimize,
     });
-    translate_sdl_header.addIncludeDir(sdl.path("include").getPath(b));
+    translate_sdl_header.addIncludePath(sdl.path("include"));
     if (target.result.os.tag == .windows) {
         translate_sdl_header.defineCMacroRaw("_WINDOWS=");
         translate_sdl_header.defineCMacroRaw("_WIN32=");
@@ -274,7 +274,7 @@ pub fn build(b: *std.Build) !void {
 
         translate_sdl_header.defineCMacroRaw("ZIG_SDL_SHADERCROSS=");
         translate_sdl_header.defineCMacroRaw("SDL_GPU_SHADERCROSS_SPIRVCROSS=1");
-        translate_sdl_header.addIncludeDir(sdl_shadercross.path("include").getPath(b));
+        translate_sdl_header.addIncludePath(sdl_shadercross.path("include"));
 
         if (build_demo) {
             const demo_exe = b.addExecutable(.{ .name = "demo", .target = target, .optimize = optimize, .root_source_file = b.path("example/demo.zig") });
