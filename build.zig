@@ -134,7 +134,7 @@ pub fn build(b: *std.Build) !void {
         },
         else => {
             const config_header = b.addConfigHeader(.{
-                .style = .{ .cmake = sdl.path("include/build_config/SDL_config.h.cmake") },
+                .style = .{ .cmake = sdl.path("include/build_config/SDL_build_config.h.cmake") },
                 .include_path = "sdl3/SDL_config.h",
             }, .{});
             sdl_lib.addConfigHeader(config_header);
